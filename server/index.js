@@ -3,6 +3,7 @@ const fetch = require('node-fetch')
 const cors = require('@fastify/cors')
 
 const RINNA_API_KEY = process.env['RINNA_API_KEY']
+const cache = new Map()
 
 fastify.register(cors, {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,11 @@ fastify.get('/', async (request, reply) => {
 
 fastify.post('/textToImage', async (request, reply) => {
   const prompt = JSON.parse(request.body).prompt
+
+  // if (cache.has(prompt)) {
+  //   return cache.get(prompt)
+  // }
+
   const body = {
     "data": [
       prompt,
@@ -40,10 +46,14 @@ fastify.post('/textToImage', async (request, reply) => {
     }
   }).then(async (res) => {
     const body = await res.json()
-    return {
+    const data = {
       prompt: prompt,
       images: body.data,
     }
+
+    cache.set(prompt, data)
+
+    return data
   })
 })
 
