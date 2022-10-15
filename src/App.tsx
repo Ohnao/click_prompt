@@ -1,27 +1,40 @@
-import type { Component } from 'solid-js';
-
-import logo from './logo.svg';
+import { Component, createSignal, For } from 'solid-js';
 import styles from './App.module.css';
 
 const App: Component = () => {
+  const [images, setImages] = createSignal<string[]>([])
+  const [prompt, setPrompt] = createSignal("天空の城")
+
+  const handleSubmit = async (event: SubmitEvent) => {
+    event.preventDefault()
+    console.log("before", prompt())
+    const resBody = await fetch('http://localhost:3001/textToImage', {
+      method: 'POST',
+      body: JSON.stringify({
+        'prompt': prompt(),
+      })
+    }).then((res) => {
+      return res.json()
+    })
+    const newImages = resBody.images[0]
+    setImages(newImages)
+  }
+
   return (
     <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn Solid
-        </a>
-      </header>
-    </div>
-  );
-};
+      <div>
+        <form onSubmit={handleSubmit}>
+          <input onChange={(e) => setPrompt(e.currentTarget.value)} type="text" id="prompt" value={prompt()} />
+          <button type="submit">送信</button>
+        </form>
+      </div>
+      <For each={images()}>
+        {(data) => (
+          <img src={data} />
+        )}
+      </For>
+    </div >
+  )
+}
 
 export default App;
