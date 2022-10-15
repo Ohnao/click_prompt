@@ -39,7 +39,10 @@ const App: Component = () => {
     <div class="container">
       <h1 class="title">QuickPrompt</h1>
       <div class="content">
-        <form class="form-group" onSubmit={handleSubmit}>
+        <form
+          classList={{ "form-group": true, loading: loading() }}
+          onSubmit={handleSubmit}
+        >
           <input
             placeholder="prompt..."
             class="group-input"
